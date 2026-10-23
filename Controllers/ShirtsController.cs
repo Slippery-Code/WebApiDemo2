@@ -11,14 +11,14 @@ namespace WebApiDemo2.Controllers
     [ApiController]
     [Route("api/[controller]")] //anti na les se kathe ena katw pou routareis to kaneis me auton ton tropo edw 
    //auto episeis allazei kai pws xtypas to api prepei na to xtyphseis localhost/api/shirts
-    public class ShirtsController : ControllerBase
+    public class ShirtsController : ControllerBase //kleironomoume apo to controllerBase giati edw den exoume views
     {
        
 
 
         private readonly AplicationDbContext db;
 
-        //xrisimopoioume construct gia dependency injection
+        //xrisimopoioume constructor gia dependency injection
         public ShirtsController(AplicationDbContext db) 
         {
             this.db = db; //otan h asp.net tha ekkinisei ton controloer tha koitakseiton constructor
@@ -62,10 +62,12 @@ namespace WebApiDemo2.Controllers
             
         }
         [HttpPost] //otan dinoume dedomena apo body sinithos ta xrisimopoioume sto post h sto put
-        [Shirt_ValidateCreateShirtFilter] //to onomazei single responsibility pronciple
+        [TypeFilter(typeof(Shirt_ValidateCreateShirtFilterAttribute))] //to onomazei single responsibility pronciple
         public IActionResult CreateShirt([FromBody]Shirt shirt) //edw leme oti theloume na einai ena model Shirt kai entikeimeno shirt kai o xristi prepei na balei sigoura tous xaraktires pou den einai nullable kai an thelei kai tous nullable 
         {
-           
+            //to db einai hdh dependency injected mesw tou constructor sto controller
+            this.db.Shirts.Add(shirt);
+            this.db.SaveChanges();
 
             ShirtRepository.AddShirt(shirt);
 
@@ -79,15 +81,21 @@ namespace WebApiDemo2.Controllers
         [HttpPut("{id}")]
         [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         [Shirt_ValidateUpdateShirtFilter]
-        [Shirt_HandleUpdateExceptionsFilter]
+        [TypeFilter(typeof(Shirt_HandleUpdateExceptionsFilterAttribute))]
         public IActionResult UpdateShirt(int id,Shirt shirt)
         {
 
-            ShirtRepository.UpdateShirt(shirt); //to try catch ginetai sto filtro
+            // antikatastasi me in framework core ShirtRepository.UpdateShirt(shirt); //to try catch ginetai sto filtro
             //edw kanoume try catch as poyme giati mporei na diagraftei to shirt prin prolaboume na to enimerosoume
 
+            var shirtToUpdate = HttpContext.Items["shirt"] as Shirt; //twra prepei na xrisimopoisoume tin shirt parametros gia na kanoume update thn shirt metabliti auth pame sto shirtRepository
+            shirtToUpdate.Brand = shirt.Brand;
+            shirtToUpdate.Price = shirt.Price;
+            shirtToUpdate.Size = shirt.Size;
+            shirtToUpdate.Color = shirt.Color;
+            shirtToUpdate.Gender = shirt.Gender;
 
-
+            db.SaveChanges();
 
             return NoContent();
         }
@@ -96,10 +104,14 @@ namespace WebApiDemo2.Controllers
         [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         public IActionResult DeleteShirt(int id)
         {
-            var shirt = ShirtRepository.GetShirtById(id); //to kanoume gia na kanoume display to id pou diagrafoume
-            ShirtRepository.DeleteShirt(id);
-            
-            return Ok(shirt);
+            /*var shirt = ShirtRepository.GetShirtById(id); //to kanoume gia na kanoume display to id pou diagrafoume
+            ShirtRepository.DeleteShirt(id); */
+            var shirtToDelete = HttpContext.Items["shirt"] as Shirt;
+
+            db.Shirts.Remove(shirtToDelete);
+            db.SaveChanges();
+            // otan trexei to save changes blepei poio shirt tha diagraftei kai to markarei deleted tote tha paragei ena delete sql query ston sql server
+            return Ok(shirtToDelete);
         }
     }
 }
