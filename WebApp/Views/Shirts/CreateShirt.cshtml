@@ -1,0 +1,67 @@
+﻿@model Shirt
+
+<h3>Shirt</h3>
+<br /> <!-- sto asp-action bazoume to onoma tou action pou exoume sto ShirtsController -->
+<form method="post" asp-action="CreateShirt"> <!-- den xreiazetai na dieukrinisoume to controller giati einai relative sto shirts controller mallon (onoma fakelou)-->
+    <div class="text-danger" asp-validation-summary="All"></div>    <!-- edw emfanizontai ta error apo ta model shirt , telika theloume na emfanizoume efoson diorthosame ta error pou petaei allazoume na mas dinei All-->
+    <div class="mb-3 row">
+        <div class="col-2">
+            <label asp-for="Brand" class="col-form-label"></label>
+        </div>
+        <div class="col-6">
+            <input type="text" asp-for="Brand" class="form-control" />
+        </div>
+        <div class="col">
+            <span class="text-danger" asp-validation-for="Brand"></span>
+        </div><!-- an thelw na deiksw kai poio entry akribos exei to error -->
+    </div>
+     <div class="mb-3 row">
+        <div class="col-2">
+            <label asp-for="Gender" class="col-form-label"></label>
+        </div>
+        <div class="col-6">
+            <input type="text" asp-for="Gender" class="form-control" />
+        </div>
+        <div class="col">
+            <span class="text-danger" asp-validation-for="Gender"></span> <!-- displaying errors -->
+        </div>
+    </div>
+     <div class="mb-3 row">
+        <div class="col-2">
+            <label asp-for="Color" class="col-form-label"></label>
+        </div>
+        <div class="col-6">
+            <input type="text" asp-for="Color" class="form-control" />
+        </div>
+        <div class="col">
+            <span class="text-danger" asp-validation-for="Color"></span> <!-- displaying errors -->
+        </div>
+    </div>
+     <div class="mb-3 row">
+        <div class="col-2">
+            <label asp-for="Size" class="col-form-label"></label>
+        </div>
+        <div class="col-6">
+            <input type="number" asp-for="Size" class="form-control" min="1"/>
+        </div>
+        <div class="col">
+            <span class="text-danger" asp-validation-for="Size"></span> <!-- displaying errors -->
+        </div>
+    </div>
+     <div class="mb-3 row">
+        <div class="col-2">
+            <label asp-for="Price" class="col-form-label"></label>
+        </div>
+        <div class="col-6">
+            <input type="number" asp-for="Price" class="form-control" />
+        </div>
+    </div>
+     <div class="mb-3 row">
+        <div class="col-2">
+            <input type="submit" class="btn btn-primary" value="Submit" />
+        </div>
+        <div class="col-6">
+            
+        </div>
+    </div>
+</form>
