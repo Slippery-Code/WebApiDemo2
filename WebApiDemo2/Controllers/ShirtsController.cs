@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebApiDemo2.Attributes;
 using WebApiDemo2.Data;
 using WebApiDemo2.Filters.ActionFilters;
+using WebApiDemo2.Filters.AuthFilters;
 using WebApiDemo2.Filters.ExceptionFilters;
 using WebApiDemo2.Models;
 using WebApiDemo2.Models.Repositories;
@@ -10,7 +12,8 @@ namespace WebApiDemo2.Controllers
     //gia na einai enas webApi controller prepei na exei to attribute [ApiControllers] kai na klironomei apo to ControllerBase
     [ApiController]
     [Route("api/[controller]")] //anti na les se kathe ena katw pou routareis to kaneis me auton ton tropo edw 
-   //auto episeis allazei kai pws xtypas to api prepei na to xtyphseis localhost/api/shirts
+                                //auto episeis allazei kai pws xtypas to api prepei na to xtyphseis localhost/api/shirts
+    [JwtTokenAuthFilter] //protecting the whole controller
     public class ShirtsController : ControllerBase //kleironomoume apo to controllerBase giati edw den exoume views
     {
        
@@ -29,6 +32,7 @@ namespace WebApiDemo2.Controllers
 
         //[Route("/shirts")] settaroume to url
         [HttpGet]
+        [RequiredClaim("read", "true")] //required claim attribute
         public IActionResult GetShirts()
         {
             return Ok(db.Shirts.ToList()); //otan xrisimopoioume to ToList anagkazoume to entity framework core 
@@ -43,6 +47,7 @@ namespace WebApiDemo2.Controllers
         //[Shirt_ValidateShirtIdFilter] epeidi balame dependency injection ston constructor den mporoume na xrisimopoisoume to filtro
         //to kanoume omws me ton akoloutho tropo kai prepei na antikatastisoume opou kanoume to Shirt_ValidateShirtIdFilter me to TypeFilter
         [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
+        [RequiredClaim("read", "true")]
         public IActionResult GetShirtById(int id)  //to IActionResult san return type to xrisimopoieis otan theleis na epistrepseis kapoio status code ok not found klp
         {
             /*if (id <= 0)
@@ -63,6 +68,7 @@ namespace WebApiDemo2.Controllers
         }
         [HttpPost] //otan dinoume dedomena apo body sinithos ta xrisimopoioume sto post h sto put
         [TypeFilter(typeof(Shirt_ValidateCreateShirtFilterAttribute))] //to onomazei single responsibility pronciple
+        [RequiredClaim("write", "true")]
         public IActionResult CreateShirt([FromBody]Shirt shirt) //edw leme oti theloume na einai ena model Shirt kai entikeimeno shirt kai o xristi prepei na balei sigoura tous xaraktires pou den einai nullable kai an thelei kai tous nullable 
         {
             //to db einai hdh dependency injected mesw tou constructor sto controller
@@ -82,6 +88,7 @@ namespace WebApiDemo2.Controllers
         [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
         [Shirt_ValidateUpdateShirtFilter]
         [TypeFilter(typeof(Shirt_HandleUpdateExceptionsFilterAttribute))]
+        [RequiredClaim("write", "true")]
         public IActionResult UpdateShirt(int id,Shirt shirt)
         {
 
@@ -102,6 +109,7 @@ namespace WebApiDemo2.Controllers
 
         [HttpDelete("{id}")]
         [TypeFilter(typeof(Shirt_ValidateShirtIdFilterAttribute))]
+        [RequiredClaim("delete", "true")]
         public IActionResult DeleteShirt(int id)
         {
             /*var shirt = ShirtRepository.GetShirtById(id); //to kanoume gia na kanoume display to id pou diagrafoume

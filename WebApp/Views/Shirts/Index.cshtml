@@ -5,10 +5,14 @@
 
 @model List<Shirt> //auto einai epeidh epistrefei mia lista apo to ShirtsController
 
+    <div class="text-danger" asp-validation-summary="All"></div>
 
 <h3>Shirts </h3>
 <br/>
-<table class="table table-striped">
+
+@if (Model!=null)
+{
+    <table class="table table-striped">
     <thead>
         <tr>
             <td>Brand</td>
@@ -40,6 +44,9 @@
         }
     </tbody>
 </table>
+}
+
+
 <br />
 <a class="btn btn-primary" asp-controller="shirts" asp-action="createshirt">Create</a> <!-- dimiourgoume ena koumpi gia na pame sto add shirts (to onoma tou controller) -->
 <!-- kanoume access to page pliktrologontas to onoma tou controller prin to controller to opoio einai to default routing gia mvc-->

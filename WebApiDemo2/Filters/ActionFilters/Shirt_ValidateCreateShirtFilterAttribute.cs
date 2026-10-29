@@ -56,6 +56,7 @@ namespace WebApiDemo2.Filters.ActionFilters
                 //var existingShirt = ShirtRepository.GetShirtByProperties(shirt.Brand, shirt.Gender, shirt.Color, shirt.Size); xoris in entity framework core
                 if (existingShirt != null)
                 {
+                    //formating the error se kati sigkekrimeno
                     context.ModelState.AddModelError("shirt", "shirt already exists null");
                     var problemDetails = new ValidationProblemDetails(context.ModelState)
                     {

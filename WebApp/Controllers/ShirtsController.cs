@@ -53,16 +53,7 @@ namespace WebApp.Controllers
                 }
                 catch(WebApiException ex)
                 {
-                    if (ex.ErrorResponse!=null && 
-                        ex.ErrorResponse.Errors !=null &&
-                        ex.ErrorResponse.Errors.Count > 0)
-                    {
-                        foreach(var error in ex.ErrorResponse.Errors)
-                        {
-                            ModelState.AddModelError(error.Key, string.Join("; ", error.Value));
-                            //den einai meros tou model validation, 
-                        }
-                    }
+                    HandleWebApiException(ex);
                 }
             }
             
@@ -73,12 +64,21 @@ namespace WebApp.Controllers
         //an den baleis http verb apo default einai get method
         public async Task<IActionResult> UpdateShirt(int shirtId) //shirtId dld poio shirt theloume na kanoume update
         {
-            var shirt = await webApiExecuter.InvokeGet<Shirt>($"shirts/{shirtId}");
-            if (shirt!=null)
+            try
             {
-                return View(shirt); //kanw bind to shirt sto view
-            }
+                var shirt = await webApiExecuter.InvokeGet<Shirt>($"shirts/{shirtId}");
+                if (shirt != null)
+                {
+                    return View(shirt); //kanw bind to shirt sto view
+                }
 
+                
+            }
+            catch(WebApiException ex)
+            {
+                HandleWebApiException(ex);
+                return View(); //refreshes page so the user will see the error directly an den thelame o xristis na blepei to exception den tha epistrefame view
+            }
             return NotFound();
         }
         [HttpPost]
@@ -88,12 +88,18 @@ namespace WebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                // to put den epistrefei tipota opote den to vazoume se metabliti
-                 await webApiExecuter.InvokePut($"shirts/{shirt.ShirtId}", shirt); //sta autakia einai to endpoint , to shirt pou dinoume sto endpoint 
-                //den xreiazomaste mono to object alla kai to id //to 2o orisma tou post paei sto body
-                
-                 return RedirectToAction(nameof(Index));
-                
+                try
+                {
+                    // to put den epistrefei tipota opote den to vazoume se metabliti
+                    await webApiExecuter.InvokePut($"shirts/{shirt.ShirtId}", shirt); //sta autakia einai to endpoint , to shirt pou dinoume sto endpoint 
+                                                                                      //den xreiazomaste mono to object alla kai to id //to 2o orisma tou post paei sto body
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch(WebApiException ex)
+                {
+                    HandleWebApiException(ex);
+                }
             }
 
             //an to validation den pernaei tote epistrefoume to parakatw view
@@ -103,8 +109,43 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteShirt([FromForm]int shirtId) //gia na eimaste sigouroi oti erxete apo tin forma bazoume to FromForm
         {
-            await webApiExecuter.InvokeDelete($"shirts/{shirtId}");
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await webApiExecuter.InvokeDelete($"shirts/{shirtId}");
+                return RedirectToAction(nameof(Index));
+            }
+            catch(WebApiException ex)
+            {
+                HandleWebApiException(ex);
+                return View(nameof(Index), await webApiExecuter.InvokeGet<List<Shirt>>("shirts"));
+                //me auton ton tropo den xanoume ta model state kai to error mnm emfanizonte opws epishs kai ta shirts
+
+                //katw exoume mazepsei kapoia errors pou einai ModelState an kanoume RedirectToAction  xanonte ata ta ModelState
+            }
         }
+
+
+        private void HandleWebApiException(WebApiException ex)
+        {
+            if (ex.ErrorResponse != null &&
+                        ex.ErrorResponse.Errors != null &&
+                        ex.ErrorResponse.Errors.Count > 0)
+            {
+                foreach (var error in ex.ErrorResponse.Errors)
+                {
+                    ModelState.AddModelError(error.Key, string.Join("; ", error.Value));
+                    //den einai meros tou model validation, 
+                }
+            }
+            else if (ex.ErrorResponse !=null)
+            {
+                ModelState.AddModelError("Error", ex.ErrorResponse.Title);
+            }
+            else
+            {
+                ModelState.AddModelError("Error", ex.Message);
+            }
+        }
+
     }
 }

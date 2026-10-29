@@ -4,7 +4,7 @@
 <br /> <!-- sto asp-action bazoume to onoma tou action pou exoume sto ShirtsController -->
 <form method="post" asp-action="UpdateShirt"> <!-- den xreiazetai na dieukrinisoume to controller giati einai relative sto shirts controller mallon (onoma fakelou)-->
     <input type="hidden" asp-for="ShirtId" /> <!-- otan o xristis kanei save ta dedomena tha ginoun post back mazi me to shirtId -->
-    <div class="text-danger" asp-validation-summary="ModelOnly"></div>    <!-- edw emfanizontai ta error apo ta model shirt -->
+    <div class="text-danger" asp-validation-summary="All"></div>    <!-- edw emfanizontai ta error apo ta model shirt -->
     <div class="mb-3 row">
         <div class="col-2">
             <label asp-for="Brand" class="col-form-label"></label>
